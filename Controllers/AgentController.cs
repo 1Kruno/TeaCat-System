@@ -98,6 +98,7 @@ namespace WebApplication5.Controllers
         // GET: Agent/Create
         public ActionResult Create()
         {
+            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
             return View();
         }
 
@@ -106,15 +107,18 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Surname,FirstName,Email")] Agent agent)
+        public ActionResult Create([Bind(Include = "AgentID,Surname,FirstName,Email,DepartmentID")] Agent agent)
         {
             if (ModelState.IsValid)
             {
+                var oldnextAgentId = this.db.Agents.Max(theagent => theagent.AgentID);
+                var newAgentId = oldnextAgentId + 1;
+                agent.AgentID = newAgentId;
                 db.Agents.Add(agent);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
+            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName", agent.DepartmentID);
             return View(agent);
         }
 
@@ -130,6 +134,7 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
             return View(agent);
         }
 
@@ -146,6 +151,7 @@ namespace WebApplication5.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName", agent.DepartmentID);
             return View(agent);
         }
 

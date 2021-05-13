@@ -1,5 +1,6 @@
 ﻿using PagedList;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -109,11 +110,95 @@ namespace WebApplication5.Controllers
         {
             if (ModelState.IsValid)
             {
-                var oldnextTicketId = this.db.Tickets.Max(theticket => theticket.TicketID);
-                var newTicketId = oldnextTicketId + 1;
-                ticket.TicketID = newTicketId;
+                // ASSIGNMENT OPERATION
+                int numberOdDepartments = this.db.Departments.Max(thedepartment => thedepartment.DepartmentID); // GET THE NUMBER OF DEPARTMENTS
+                int[][] DepartmentIDandKeywordMatches = new int[numberOdDepartments][]; // CREATE A JAGGED ARRAY FOR EACH DEPARTMENT
+                System.Diagnostics.Debug.WriteLine("There are " + numberOdDepartments + " departments.");
+                int matchScore; // INSTANTIATE THE MATCH SCORE
+                int matchDepartment = 1;
+                int agentLeastTicketsID = 1;
+
+                // CREATE A JAGGED ARRAY FOR EACH DEPARTMENT [DEPARTMENT ID][# OF MATCHES]
+                for (int i=0; i< numberOdDepartments; i++)
+                {
+                    DepartmentIDandKeywordMatches[i] = new int[] { 0 };
+                }
+
+                string ticketTitleWord = ticket.Title.ToString(); // TAKE INPUT FROM TICKET TITLE
+                string ticketBodyWord = ticket.Body.ToString(); // TAKE INPUT FROM TICKET BODY
+                string titleAndBodyWord = ticketTitleWord + " " + ticketBodyWord; // COMBINE INTO 1 STRING
+                string[] ticketWordList = titleAndBodyWord.Split(null); // ISOLATE EACH WORD
+
+                foreach (var word in ticketWordList) // ITERATE THROUGH TICKET WORDS
+                {
+                    var result1 = db.KeywordsDepartments.Where(x => x.Keyword.Contains(word)).ToList(); // FETCH KEYWORDS
+                    var result = result1.ToString();
+                    foreach(var keyword in result1) // ITERATE THROUGH KEYWORDS
+                    {
+                        bool matches = word.Equals(keyword.Keyword.ToString(), StringComparison.OrdinalIgnoreCase); // COMPARE
+                        if (matches) // IF THEY MATCH
+                        {
+                            System.Diagnostics.Debug.WriteLine("Match found.");
+                            int targetDepartmentID = keyword.DepartmentID; // GET DEPARTMENT INDEX FROM DB
+                            int y = DepartmentIDandKeywordMatches[targetDepartmentID][0]; // GET DEPARTMENT ID FROM ARRAY
+                            int z = y + 1; // INCREMENT SCORE FOR # OF MATCHES
+                            DepartmentIDandKeywordMatches[targetDepartmentID][0] = z; // UPDATE THE SCORE
+
+                            //int matchScore; // INSTANTIATE THE MATCH SCORE
+                            //int matchDepartment;
+                            for (int n = 0; n < DepartmentIDandKeywordMatches.Length; n++) // ITERATE THROUGH ARRAY
+                            {
+                                for (int k = 0; k < DepartmentIDandKeywordMatches[n].Length; k++)
+                                {
+                                    matchScore = DepartmentIDandKeywordMatches[0][0]; // MATCH SCORE IS THE 1ST SCORE IN ARRAY
+                                    if(DepartmentIDandKeywordMatches[n][k] > matchScore) // IF THE BIGGER SCORE IS FOUND
+                                    {
+                                        matchScore = DepartmentIDandKeywordMatches[n][k]; // MATCH SCORE IS THE BIGGER SCORE
+                                        matchDepartment = n; // DEPARTMENT ID WITH MOST MATCHES
+                                        System.Diagnostics.Debug.WriteLine("Score: " + matchScore);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+   
+                var agentsResult = db.Agents.Where(m => m.DepartmentID.Equals(matchDepartment)).ToList(); // FETCH AGENTS FROM TARGET DEPARTMENT
+                bool firstAgent = true; // BOOL TO TAKE THE VALUE FROM 1ST AGENT AS PARAM
+                int agentLeastTickets = 500; // INSTANTIATE
+                foreach(var agent in agentsResult)
+                {
+                    if (firstAgent) // SET 1ST AFENT AS COMPARISON
+                    {
+                        agentLeastTickets = agent.TicketsAssigned;
+                        agentLeastTicketsID = agent.AgentID;
+                        firstAgent = false; // MAKE THIS PART UNAVAILABLE FOR THE REST
+                    }
+                    if (agent.TicketsAssigned < agentLeastTickets) // IF THERE'S AN AGENT WITH LESS TICKETS THAN 1ST AGENT
+                    {
+                        agentLeastTickets = agent.TicketsAssigned; // TICKET COUNT FOR THAT AGENT
+                        agentLeastTicketsID = agent.AgentID; // TARGET THAT AGENT
+                        System.Diagnostics.Debug.WriteLine(" New data: Agent with least tickets: " + agent.FirstName + " and ID:" + agent.AgentID);
+                    }
+                    System.Diagnostics.Debug.WriteLine("Agent with least tickets: " + agent.FirstName + " and ID:" + agent.AgentID + " and ticket count " + agent.TicketsAssigned +". Current least ID is: " + agentLeastTicketsID);
+                }
+
+                var listOfAgents = db.Agents.Where(n => n.AgentID.Equals(agentLeastTicketsID)).ToList(); // FIND AGENT
+                foreach(var agent in listOfAgents)
+                {
+                    int noOfAssignedTickets = agent.TicketsAssigned + 1; // UPDATE TICKET COUNT
+                    agent.TicketsAssigned = noOfAssignedTickets;
+                    System.Diagnostics.Debug.WriteLine("Agent has " + noOfAssignedTickets + " tickets assigned");
+                }
+                
+                System.Diagnostics.Debug.WriteLine("Ticket goes to ID:" + agentLeastTicketsID);
+
+                int oldnextTicketId = this.db.Tickets.Max(theticket => theticket.TicketID); // GET THE LAST INDEX
+                int newTicketId = oldnextTicketId + 1; // INCREMENT INDEX BY 1
+                ticket.TicketID = newTicketId; // ASSIGN INDEX FOR THE TICKET
                 ticket.Status = "New";
                 ticket.CreatedAt = DateTime.Now;
+                ticket.AgentID = agentLeastTicketsID; // ASSIGN TICKET TO AGENT WITH LEAST AMOUNT OF TICKETS
                 db.Tickets.Add(ticket);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -134,6 +219,7 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName");
             return View(ticket);
         }
 
@@ -150,6 +236,7 @@ namespace WebApplication5.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID);
             return View(ticket);
         }
 

@@ -11,9 +11,12 @@ namespace WebApplication5.Models
         public string Surname { get; set; }
         public string FirstName { get; set; }
         public string Email { get; set; }
-        //public string Department { get; set; }
         public int DepartmentID { get; set; }
         public string Role { get; set; }
+        public int TicketsAssigned { get; set; }
+        public int TicketsPending { get; set; }
+        public int TicketsSolved { get; set; }
+
 
         public virtual ICollection<Assignment> Assignments { get; set; }
 

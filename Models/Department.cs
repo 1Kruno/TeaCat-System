@@ -7,15 +7,15 @@ namespace WebApplication5.Models
 {
     public class Department
     {
-        public int DepartmentId { get; set; }
+        public int DepartmentID { get; set; }
         public string DepartmentName { get; set; }
 
         public Department()
         { }
 
-        public Department(int departmentId, string departmentName)
+        public Department(int departmentID, string departmentName)
         {
-            DepartmentId = departmentId;
+            DepartmentID = departmentID;
             DepartmentName = departmentName;
         }
 

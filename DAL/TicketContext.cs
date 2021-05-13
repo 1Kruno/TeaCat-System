@@ -13,6 +13,7 @@ namespace WebApplication5.DAL
 
         public TicketContext() : base("TicketContext")
         {
+            //this.Configuration.ProxyCreationEnabled = false;
         }
 
         public DbSet<Agent> Agents { get; set; }
@@ -26,5 +27,7 @@ namespace WebApplication5.DAL
         }
 
         public System.Data.Entity.DbSet<WebApplication5.Models.Department> Departments { get; set; }
+
+        public System.Data.Entity.DbSet<WebApplication5.Models.KeywordsDepartment> KeywordsDepartments { get; set; }
     }
 }

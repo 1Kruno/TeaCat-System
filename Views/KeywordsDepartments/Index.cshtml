@@ -1,0 +1,39 @@
+﻿@model IEnumerable<WebApplication5.Models.KeywordsDepartment>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Keywords for ticket assignment</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+           <h4>Department name</h4>
+        </th>
+        <th>
+            <h4>Keyword</h4>
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Department.DepartmentName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Keyword)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.KeywordID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.KeywordID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.KeywordID })
+        </td>
+    </tr>
+}
+
+</table>

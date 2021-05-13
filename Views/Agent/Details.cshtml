@@ -4,14 +4,14 @@
     ViewBag.Title = "Details";
 }
 
-<h2>Details About Agent</h2>
+<h2>Details about agent</h2>
 
 <div>
-    <h4>Agent</h4>
+
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.FirstName)
+            @Html.LabelFor(model => model.FirstName, "First Name")
         </dt>
         <dd>
             @Html.DisplayFor(model => model.FirstName)
@@ -37,6 +37,8 @@
         <dd>
             @Html.DisplayFor(model => model.Department.DepartmentName)
         </dd>
+        <br />
+        <br />
 
         <dt>
             @Html.DisplayNameFor(model => model.Assignments)
@@ -44,20 +46,22 @@
         <dd>
             <table class="table">
                 <tr>
-                    <th>Ticket Title</th>
-                    <th>Ticket Creation Date</th>
+                    <th>Tickets assigned</th>
+                    <th>Tickets pending</th>
+                    <th>Tickets solved</th>
                 </tr>
-                @foreach (var item in Model.Assignments)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Ticket.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Ticket.CreatedAt)
-                        </td>
-                    </tr>
-                }
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.TicketsAssigned)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.TicketsPending)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.TicketsSolved)
+                    </td>
+                </tr>
+
             </table>
         </dd>
 
