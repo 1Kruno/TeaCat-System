@@ -18,6 +18,7 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: Ticket
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             ViewBag.CurrentSort = sortOrder;
@@ -81,6 +82,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Details/5
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -96,6 +98,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Create
+        [Authorize]
         public ActionResult Create()
         {
             return View();
@@ -106,6 +109,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Create([Bind(Include = "TicketID,Title,Body,Status,CreatedAt,AgentID,DepartmentID")] Ticket ticket)
         {
             if (ModelState.IsValid)
@@ -208,6 +212,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Edit/5
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -228,6 +233,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit([Bind(Include = "TicketID,Title,Body,Status,CreatedAt,AgentID")] Ticket ticket)
         {
             if (ModelState.IsValid)
@@ -241,6 +247,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Delete/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -258,6 +265,7 @@ namespace WebApplication5.Controllers
         // POST: Ticket/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult DeleteConfirmed(int id)
         {
             Ticket ticket = db.Tickets.Find(id);
