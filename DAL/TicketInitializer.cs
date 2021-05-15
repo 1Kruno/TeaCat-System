@@ -11,15 +11,15 @@ namespace WebApplication5.DAL
 {
     public class TicketInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<TicketContext>
     {
-        /*
+        
         public override void InitializeDatabase(TicketContext context)
         {
             context.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction
-                , string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE", context.Database.Connection.Database));
+            , string.Format("ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", context.Database.Connection.Database));
 
             base.InitializeDatabase(context);
         }
-        */
+        
 
         protected override void Seed(TicketContext context)
         {
@@ -68,16 +68,16 @@ namespace WebApplication5.DAL
 
             var tickets = new List<Ticket>
             {
-            new Ticket{TicketID=1,Title="Help regarding the sales",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=1},
-            new Ticket{TicketID=2,Title="I need info about pricing",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=1},
-            new Ticket{TicketID=3,Title="I need help",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=1},
-            new Ticket{TicketID=4,Title="How do I log in?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=1},
-            new Ticket{TicketID=5,Title="Where do I view things?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=3},
-            new Ticket{TicketID=6,Title="????",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=3},
-            new Ticket{TicketID=7,Title="Bug found",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=3},
-            new Ticket{TicketID=8,Title="Who can help me with PC?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=5},
-            new Ticket{TicketID=9,Title="I found something cheaper",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=5},
-            new Ticket{TicketID=10,Title="I want to leave",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status="New",AgentID=5}
+            new Ticket{TicketID=1,Title="Help regarding the sales",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=1},
+            new Ticket{TicketID=2,Title="I need info about pricing",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=1},
+            new Ticket{TicketID=3,Title="I need help",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=1},
+            new Ticket{TicketID=4,Title="How do I log in?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=1},
+            new Ticket{TicketID=5,Title="Where do I view things?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=3},
+            new Ticket{TicketID=6,Title="????",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=3},
+            new Ticket{TicketID=7,Title="Bug found",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=3},
+            new Ticket{TicketID=8,Title="Who can help me with PC?",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=5},
+            new Ticket{TicketID=9,Title="I found something cheaper",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=5},
+            new Ticket{TicketID=10,Title="I want to leave",Body="Sample text for the ticket",CreatedAt=DateTime.Parse("2020-12-12"),Status=Ticket.TicketStatus.Open,AgentID=5}
             };
             tickets.ForEach(s => context.Tickets.Add(s));
             context.SaveChanges();

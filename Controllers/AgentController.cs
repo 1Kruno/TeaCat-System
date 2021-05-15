@@ -1,4 +1,6 @@
-﻿using PagedList;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -107,6 +109,7 @@ namespace WebApplication5.Controllers
             ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
             ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName");
             ViewBag.Email = new SelectList(dbc.Users, "Email", "Email");
+            ViewBag.Role = new SelectList(dbc.Roles, "Id", "Name");
             return View();
         }
 
@@ -115,7 +118,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AgentID,Surname,FirstName,Email,DepartmentID,Id,UserName,Email,UserId")] Agent agent)
+        public ActionResult Create([Bind(Include = "AgentID,Surname,FirstName,Email,DepartmentID,Id,UserName,Email,UserId,Id,Role")] Agent agent)
         {
             if (ModelState.IsValid)
             {
@@ -126,9 +129,16 @@ namespace WebApplication5.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.Email = new SelectList(dbc.Users, "Email", "Email", agent.Email);
-            ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId);
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID",null , agent.DepartmentID);
+            var ue = ViewBag.Email = new SelectList(dbc.Users, "Email", "Email", agent.Email);
+            var uid = ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId);
+            var ur = ViewBag.Role= new SelectList(dbc.Roles, "Id", "Name", agent.Role);
+            var did = ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID",null , agent.DepartmentID);
+
+            var userStore = new UserStore<ApplicationUser>(dbc);
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            userManager.AddToRole(agent.UserId, agent.Role);
+            System.Diagnostics.Debug.WriteLine("UserID: " + agent.UserId.ToString());
+            System.Diagnostics.Debug.WriteLine("userRole: " + agent.Role.ToString());
             return View(agent);
         }
 

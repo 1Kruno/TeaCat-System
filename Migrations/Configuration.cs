@@ -17,7 +17,7 @@ namespace WebApplication5.Migrations
 
         protected override void Seed(WebApplication5.Models.ApplicationDbContext context)
         {
-
+            // ADD 3 TEST USERS WITH DIFFERENT ROLES
             var userStore = new UserStore<ApplicationUser>(context);
             var userManager = new UserManager<ApplicationUser>(userStore);
 

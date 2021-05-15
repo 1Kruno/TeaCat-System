@@ -1,0 +1,52 @@
+﻿@model System.Collections.Generic.List<WebApplication5.Models.Ticket>
+
+@{
+    ViewBag.Title = "My Tickets";
+}
+
+<br />
+<h2>Tickets submitted</h2>
+<br />
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.ActionLink("Title", null, new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th>
+            @Html.ActionLink("Status", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th>
+            @Html.ActionLink("Agent", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th>
+            @Html.ActionLink("Created", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th>
+            @Html.ActionLink("Body", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var element in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(m => element.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(m => element.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(m => element.Agent.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(m => element.CreatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(m => element.Body)
+            </td>
+        </tr>
+    }
+
+</table>

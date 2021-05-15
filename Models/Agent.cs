@@ -15,7 +15,6 @@ namespace WebApplication5.Models
         public int DepartmentID { get; set; }
         public string Role { get; set; }
         public int TicketsAssigned { get; set; }
-        public int TicketsPending { get; set; }
         public int TicketsSolved { get; set; }
 
         

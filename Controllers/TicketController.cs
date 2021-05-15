@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using WebApplication5.DAL;
 using WebApplication5.Models;
+using Microsoft.AspNet.Identity;
 
 namespace WebApplication5.Controllers
 {
@@ -47,7 +48,7 @@ namespace WebApplication5.Controllers
             {
                 tickets = tickets.Where(s => s.Title.Contains(searchString)
                                         || s.Body.Contains(searchString)
-                                        || s.Status.Contains(searchString)
+                                        || s.Status.ToString().Contains(searchString)
                                         || s.TicketID.ToString().Contains(searchString)
                                         || s.CreatedAt.ToString().Contains(searchString)
                                         || s.Agent.FirstName.ToString().Contains(searchString)
@@ -90,11 +91,23 @@ namespace WebApplication5.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Ticket ticket = db.Tickets.Find(id);
+            //ViewBag.TicketName = db.Tickets.Find(id);
+            //var comment = db.TicketComments.Where(x => x.TicketID.Equals(id)).ToList();
             if (ticket == null)
             {
                 return HttpNotFound();
             }
             return View(ticket);
+        }
+
+        // GET ALL TICKETS SUBMITTED BY LOGGED IN USER
+        [Authorize]
+        public ActionResult MyTickets()
+        {
+            string currentUserId = User.Identity.GetUserId();
+            ViewBag.myTicketList = db.Tickets.Where(m => m.RequesterID.Contains(currentUserId)).ToList();
+            var theResult = db.Tickets.Where(m => m.RequesterID.Contains(currentUserId)).ToList();
+            return View(theResult);
         }
 
         // GET: Ticket/Create
@@ -200,9 +213,11 @@ namespace WebApplication5.Controllers
                 int oldnextTicketId = this.db.Tickets.Max(theticket => theticket.TicketID); // GET THE LAST INDEX
                 int newTicketId = oldnextTicketId + 1; // INCREMENT INDEX BY 1
                 ticket.TicketID = newTicketId; // ASSIGN INDEX FOR THE TICKET
-                ticket.Status = "New";
+                ticket.Status = Ticket.TicketStatus.Open;
                 ticket.CreatedAt = DateTime.Now;
                 ticket.AgentID = agentLeastTicketsID; // ASSIGN TICKET TO AGENT WITH LEAST AMOUNT OF TICKETS
+                ticket.RequesterID = User.Identity.GetUserId();
+                ticket.DepartmentID = db.Agents.Find(agentLeastTicketsID).DepartmentID;
                 db.Tickets.Add(ticket);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -215,6 +230,7 @@ namespace WebApplication5.Controllers
         [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit(int? id)
         {
+            System.Diagnostics.Debug.WriteLine("I got here 1:");
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -224,7 +240,9 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName");
+            System.Diagnostics.Debug.WriteLine("I got here 2:");
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName"); // GET LIST OF AGENTS
+            
             return View(ticket);
         }
 
@@ -239,6 +257,20 @@ namespace WebApplication5.Controllers
             if (ModelState.IsValid)
             {
                 db.Entry(ticket).State = EntityState.Modified;
+                
+                if (ticket.Status.Equals(Ticket.TicketStatus.Solved))
+                {
+                    int targetAgentId = ticket.AgentID;
+                    var targetAgent = db.Agents.Find(targetAgentId).AgentID;
+                    int ticketSolvedCount = db.Agents.Find(targetAgent).TicketsSolved;
+                    int newSolvedTicketCount = ticketSolvedCount + 1;
+                    db.Agents.Find(targetAgent).TicketsSolved = newSolvedTicketCount;
+
+                    int ticketOpenedCount = db.Agents.Find(targetAgent).TicketsAssigned;
+                    int newticketOpenedCount = ticketOpenedCount - 1;
+                    db.Agents.Find(targetAgent).TicketsAssigned = newticketOpenedCount;
+                }
+                ticket.CreatedAt = DateTime.Now;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
