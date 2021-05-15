@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
-using Microsoft.AspNet.Identity;
 
 namespace WebApplication5.Models
 {
@@ -15,11 +15,17 @@ namespace WebApplication5.Models
         public int DepartmentID { get; set; }
         public string Role { get; set; }
         public int TicketsAssigned { get; set; }
-        public int TicketsPending { get; set; }
         public int TicketsSolved { get; set; }
 
+        
+        public string UserId { get; set; }
+        [ForeignKey("UserId")]
+        public virtual ApplicationUser User { get; set; }
+
+        //public string UserId { get; set; }
         public virtual ICollection<Assignment> Assignments { get; set; }
 
         public virtual Department Department { get; set; }
+       // public virtual ApplicationUser User { get; set; }
     }
 }

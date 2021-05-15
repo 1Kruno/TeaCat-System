@@ -16,12 +16,14 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: Department
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Index()
         {
             return View(db.Departments.ToList());
         }
 
         // GET: Department/Details/5
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -37,6 +39,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Department/Create
+        [Authorize(Roles = "TCAdmin")]
         public ActionResult Create()
         {
             return View();
@@ -47,6 +50,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin")]
         public ActionResult Create([Bind(Include = "DepartmentId,DepartmentName")] Department department)
         {
             if (ModelState.IsValid)
@@ -60,6 +64,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Department/Edit/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -79,6 +84,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Edit([Bind(Include = "DepartmentId,DepartmentName")] Department department)
         {
             if (ModelState.IsValid)
@@ -91,6 +97,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Department/Delete/5
+        [Authorize(Roles = "TCAdmin")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -108,6 +115,7 @@ namespace WebApplication5.Controllers
         // POST: Department/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin")]
         public ActionResult DeleteConfirmed(int id)
         {
             Department department = db.Departments.Find(id);

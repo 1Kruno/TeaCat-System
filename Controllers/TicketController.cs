@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using WebApplication5.DAL;
 using WebApplication5.Models;
+using Microsoft.AspNet.Identity;
 
 namespace WebApplication5.Controllers
 {
@@ -18,15 +19,17 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: Ticket
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")] // AUTHORIZE ONLY USERS IN THE FOLLOWING ROLES - TCAdmin, TCAgent and TCManager
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
+            // TICKET SORTING
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "body_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "status_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
-
+            // SERACH FUNCTION
             if (searchString != null)
             {
                 page = 1;
@@ -37,23 +40,22 @@ namespace WebApplication5.Controllers
             }
 
             ViewBag.CurrentFilter = searchString;
-
-            var tickets = from s in db.Tickets
-            //IQueryable<Ticket> tickets = from s in db.Tickets
+            // SHOWING ONLY OPENED TICKETS
+            var tickets = from s in db.Tickets where s.Status.ToString().Contains("Open")
                           select s;
 
             if (!String.IsNullOrEmpty(searchString))
             {
                 tickets = tickets.Where(s => s.Title.Contains(searchString)
                                         || s.Body.Contains(searchString)
-                                        || s.Status.Contains(searchString)
+                                        || s.Status.ToString().Contains(searchString)
                                         || s.TicketID.ToString().Contains(searchString)
                                         || s.CreatedAt.ToString().Contains(searchString)
                                         || s.Agent.FirstName.ToString().Contains(searchString)
                                         || s.Department.DepartmentName.ToString().Contains(searchString)
                                         );
             }
-
+            // SORTING OPTIONS
             switch (sortOrder)
             {
                 case "title_desc":
@@ -80,7 +82,8 @@ namespace WebApplication5.Controllers
             return View(tickets.ToPagedList(pageNumber, pageSize));
         }
 
-        // GET: Ticket/Details/5
+        // GET: Ticket/Details/5 - TICKET DETAILS
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -95,7 +98,29 @@ namespace WebApplication5.Controllers
             return View(ticket);
         }
 
+        // GET ALL TICKETS SUBMITTED BY LOGGED IN USER
+        [Authorize]
+        public ActionResult MyTickets()
+        {
+            string currentUserId = User.Identity.GetUserId();
+            ViewBag.myTicketList = db.Tickets.Where(m => m.RequesterID.Contains(currentUserId)).ToList();
+            var theResult = db.Tickets.Where(m => m.RequesterID.Contains(currentUserId)).ToList();
+            return View(theResult);
+        }
+
         // GET: Ticket/Create
+        /*
+         * WORKS IN THE FOLLOWING WAY:
+         * PARTIAL USER DATA IS SAVED ON THE TICKET
+         * WHEN THE TICKET IS SUBMITTED, SYSTEM SCANS THE TICKET FOR THE KEYWORDS AND KEEPS A SCORE FOR EACH KEYWORD FOUND AND DEPARTMENT
+         * THE SCORE IS THEN EVALUATED AND THE DEPARTMENT WITH THE BEST SCORE IS SELECTED
+         * ALL AGENTS FROM THE SELECTED DEPARTMENT ARE PULLED
+         * ALL TICKETS ASSIGNED TO AGENTS ARE PULLED
+         * THE TICKET NUMBER BETWEEN EACH AGENT IS EVALUATED
+         * TICKET GOES TO AGENT WITH LEAST TICKETS IN THE DEPARTMENT
+         * DB TABLES FOR TICKETS AND AGENTS ARE UPDATED TO REFLECT CHANGES
+         */
+        [Authorize]
         public ActionResult Create()
         {
             return View();
@@ -106,6 +131,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Create([Bind(Include = "TicketID,Title,Body,Status,CreatedAt,AgentID,DepartmentID")] Ticket ticket)
         {
             if (ModelState.IsValid)
@@ -196,9 +222,11 @@ namespace WebApplication5.Controllers
                 int oldnextTicketId = this.db.Tickets.Max(theticket => theticket.TicketID); // GET THE LAST INDEX
                 int newTicketId = oldnextTicketId + 1; // INCREMENT INDEX BY 1
                 ticket.TicketID = newTicketId; // ASSIGN INDEX FOR THE TICKET
-                ticket.Status = "New";
+                ticket.Status = Ticket.TicketStatus.Open;
                 ticket.CreatedAt = DateTime.Now;
                 ticket.AgentID = agentLeastTicketsID; // ASSIGN TICKET TO AGENT WITH LEAST AMOUNT OF TICKETS
+                ticket.RequesterID = User.Identity.GetUserId();
+                ticket.DepartmentID = db.Agents.Find(agentLeastTicketsID).DepartmentID;
                 db.Tickets.Add(ticket);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -208,6 +236,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Edit/5
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -219,7 +248,8 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName");
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName"); // GET LIST OF AGENTS
+            
             return View(ticket);
         }
 
@@ -228,19 +258,35 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit([Bind(Include = "TicketID,Title,Body,Status,CreatedAt,AgentID")] Ticket ticket)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(ticket).State = EntityState.Modified;
-                db.SaveChanges();
+                db.Entry(ticket).State = EntityState.Modified; // DECLARE THAT THE ENTITY HAS BEEN CHANGED
+                
+                if (ticket.Status.Equals(Ticket.TicketStatus.Solved)) // IF THE TICKET CHANGES STATUS
+                {
+                    int targetAgentId = ticket.AgentID; // FIND AGENT ON THE TICKET
+                    var targetAgent = db.Agents.Find(targetAgentId).AgentID; // FIND THAT AGENT IN DB
+                    int ticketSolvedCount = db.Agents.Find(targetAgent).TicketsSolved; // GET # OF SOLVED TICKETS AGENT HAS
+                    int newSolvedTicketCount = ticketSolvedCount + 1; // UPDATE THE NUMBER
+                    db.Agents.Find(targetAgent).TicketsSolved = newSolvedTicketCount; // SET THE NEW NUMBER
+
+                    int ticketOpenedCount = db.Agents.Find(targetAgent).TicketsAssigned; // FIND # OF ASSIGNED TICKETS
+                    int newticketOpenedCount = ticketOpenedCount - 1; // UPDATE THE NUMBER
+                    db.Agents.Find(targetAgent).TicketsAssigned = newticketOpenedCount; // SET THE NEW NUMBER
+                }
+                ticket.CreatedAt = DateTime.Now; // SET NEW TIME
+                db.SaveChanges(); // SAVE CHANGES
                 return RedirectToAction("Index");
             }
-            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID);
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID); // GET AGENT LIST
             return View(ticket);
         }
 
         // GET: Ticket/Delete/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -258,6 +304,7 @@ namespace WebApplication5.Controllers
         // POST: Ticket/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult DeleteConfirmed(int id)
         {
             Ticket ticket = db.Tickets.Find(id);

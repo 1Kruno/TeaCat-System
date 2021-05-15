@@ -1,11 +1,10 @@
 ﻿@{
-    ViewBag.Title = "Welcome to TeaCat System";
+    ViewBag.Title = "TeaCat System";
 }
 
 <div class="jumbotron">
     <h2>Your Dashboard</h2>
     <p class="lead">Quick access to some useful links</p>
-
 </div>
 
 <div class="row">
@@ -14,40 +13,23 @@
         <img width="300px" src="~/Content/Images/create.PNG" />
         <br />
         <br />
-
-        <p>
-            This operation will create a new ticket record with paremeters such as Ticket Title, Ticket Body, Timestamp and Ticket status.
-        </p>
-        <p> <input type="button" class="btn btn-default" value="Create" onclick="location.href='@Url.Action("Create", "Ticket")'" /></p>
-
         <br />
         <img width="300px" src="~/Content/Images/view.PNG" />
         <br />
         <br />
-        <p>This operation will allow the user to view all existing tickets and their parameters.</p>
-        <p> <input type="button" class="btn btn-default" value="View" onclick="location.href='@Url.Action("Index", "Ticket")'" /></p>
-
 
     </div>
 
     <div class="col-md-6">
-        <br />
-        <img width="280px" src="~/Content/Images/createa.PNG" />
-        <br />
-        <br />
-        <p>
-            This operation will allow the user to create a new Agent and specify parameters such as Name, Surname, Department and Email.
-        </p>
-        <p> <input type="button" class="btn btn-default" value="Create" onclick="location.href='@Url.Action("Create", "Agent")'" /></p>
 
+        <h3>Experiencing issues? Submit a ticket and our dedicated team will get right on it!</h3>
+        <p> <input type="button" class="btn btn-default" value="Create a new ticket" onclick="location.href='@Url.Action("Create", "Ticket")'" /></p>
         <br />
-        <img width="280px" src="~/Content/Images/viewa.PNG" />
         <br />
         <br />
-        <p>This operation will allow the user to view all records for all agents.</p>
-        <p> <input type="button" class="btn btn-default" value="View" onclick="location.href='@Url.Action("Index", "Agent")'" /></p>
+        <br />
+        <h3>Already submitted a ticket? View all of your tickets and their current status!</h3>
+        <p> <input type="button" class="btn btn-default" value="View my tickets" onclick="location.href='@Url.Action("MyTickets", "Ticket")'" /></p>
 
     </div>
-
-
 </div>

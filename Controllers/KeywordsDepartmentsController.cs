@@ -16,6 +16,7 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: KeywordsDepartments
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Index()
         {
             var keywordsDepartments = db.KeywordsDepartments.Include(k => k.Department);
@@ -23,6 +24,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: KeywordsDepartments/Details/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -38,6 +40,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: KeywordsDepartments/Create
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Create()
         {
             ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentId", "DepartmentName");
@@ -49,6 +52,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Create([Bind(Include = "KeywordID,Keyword,DepartmentID")] KeywordsDepartment keywordsDepartment)
         {
             if (ModelState.IsValid)
@@ -63,6 +67,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: KeywordsDepartments/Edit/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -83,6 +88,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Edit([Bind(Include = "KeywordID,Keyword,DepartmentID")] KeywordsDepartment keywordsDepartment)
         {
             if (ModelState.IsValid)
@@ -96,6 +102,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: KeywordsDepartments/Delete/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -113,6 +120,7 @@ namespace WebApplication5.Controllers
         // POST: KeywordsDepartments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult DeleteConfirmed(int id)
         {
             KeywordsDepartment keywordsDepartment = db.KeywordsDepartments.Find(id);

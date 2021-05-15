@@ -3,6 +3,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using System.Data.Entity.ModelConfiguration;
+using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace WebApplication5.Models
 {
@@ -20,8 +22,6 @@ namespace WebApplication5.Models
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        // added for EntityType 'IdentityUserLogin' has no key defined. Define the key for this EntityType
-
         public ApplicationDbContext()
             : base("TicketContext", throwIfV1Schema: false)
         {

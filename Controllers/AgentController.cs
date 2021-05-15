@@ -1,4 +1,6 @@
-﻿using PagedList;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,14 +12,17 @@ using System.Web.Mvc;
 using WebApplication5.DAL;
 using WebApplication5.Models;
 
-
 namespace WebApplication5.Controllers
 {
     public class AgentController : Controller
     {
         private TicketContext db = new TicketContext();
+        private ApplicationDbContext dbc = new ApplicationDbContext();
+
 
         // GET: Agent
+        [Authorize(Roles = "TCAdmin")]
+        //[Authorize(Roles = "TCManager")]
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             ViewBag.CurrentSort = sortOrder;
@@ -79,9 +84,10 @@ namespace WebApplication5.Controllers
             return View(agents.ToPagedList(pageNumber, pageSize));
         }
 
-        
+
 
         // GET: Agent/Details/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -97,9 +103,13 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Agent/Create
+        [Authorize(Roles = "TCAdmin")]
         public ActionResult Create()
         {
             ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
+            ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName");
+            ViewBag.Email = new SelectList(dbc.Users, "Email", "Email");
+            ViewBag.Role = new SelectList(dbc.Roles, "Id", "Name");
             return View();
         }
 
@@ -108,7 +118,7 @@ namespace WebApplication5.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AgentID,Surname,FirstName,Email,DepartmentID")] Agent agent)
+        public ActionResult Create([Bind(Include = "AgentID,Surname,FirstName,Email,DepartmentID,Id,UserName,Email,UserId,Id,Role")] Agent agent)
         {
             if (ModelState.IsValid)
             {
@@ -119,11 +129,21 @@ namespace WebApplication5.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName", agent.DepartmentID);
+            var ue = ViewBag.Email = new SelectList(dbc.Users, "Email", "Email", agent.Email);
+            var uid = ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId);
+            var ur = ViewBag.Role= new SelectList(dbc.Roles, "Id", "Name", agent.Role);
+            var did = ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID",null , agent.DepartmentID);
+
+            var userStore = new UserStore<ApplicationUser>(dbc);
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            userManager.AddToRole(agent.UserId, agent.Role);
+            System.Diagnostics.Debug.WriteLine("UserID: " + agent.UserId.ToString());
+            System.Diagnostics.Debug.WriteLine("userRole: " + agent.Role.ToString());
             return View(agent);
         }
 
         // GET: Agent/Edit/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -157,6 +177,7 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Agent/Delete/5
+        [Authorize(Roles = "TCAdmin,TCManager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
