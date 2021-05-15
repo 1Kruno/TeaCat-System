@@ -51,9 +51,6 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PagedList, Version=1.17.0.0, Culture=neutral, PublicKeyToken=abbb863e9397c5e1, processorArchitecture=MSIL">
       <HintPath>packages\PagedList.1.17.0.0\lib\net40\PagedList.dll</HintPath>
@@ -178,6 +175,9 @@
     <Reference Include="Microsoft.Owin.Security.OAuth">
       <HintPath>packages\Microsoft.Owin.Security.OAuth.4.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
+      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -198,27 +198,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202105142114584_something.cs" />
-    <Compile Include="Migrations\202105142114584_something.Designer.cs">
-      <DependentUpon>202105142114584_something.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202105142121121_something2.cs" />
-    <Compile Include="Migrations\202105142121121_something2.Designer.cs">
-      <DependentUpon>202105142121121_something2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202105151146592_something3.cs" />
-    <Compile Include="Migrations\202105151146592_something3.Designer.cs">
-      <DependentUpon>202105151146592_something3.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202105151226049_something4.cs" />
-    <Compile Include="Migrations\202105151226049_something4.Designer.cs">
-      <DependentUpon>202105151226049_something4.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202105151227480_something5.cs" />
-    <Compile Include="Migrations\202105151227480_something5.Designer.cs">
-      <DependentUpon>202105151227480_something5.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Agent.cs" />
     <Compile Include="Models\Assignment.cs" />
@@ -312,7 +291,6 @@
     <Content Include="Views\KeywordsDepartments\Details.cshtml" />
     <Content Include="Views\KeywordsDepartments\Edit.cshtml" />
     <Content Include="Views\KeywordsDepartments\Index.cshtml" />
-    <Content Include="Views\Ticket\MyTickets.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -329,23 +307,6 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\202105142114584_something.resx">
-      <DependentUpon>202105142114584_something.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105142121121_something2.resx">
-      <DependentUpon>202105142121121_something2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105151146592_something3.resx">
-      <DependentUpon>202105151146592_something3.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105151226049_something4.resx">
-      <DependentUpon>202105151226049_something4.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202105151227480_something5.resx">
-      <DependentUpon>202105151227480_something5.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

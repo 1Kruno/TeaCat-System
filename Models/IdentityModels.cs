@@ -22,6 +22,8 @@ namespace WebApplication5.Models
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        // added for EntityType 'IdentityUserLogin' has no key defined. Define the key for this EntityType
+
         public ApplicationDbContext()
             : base("TicketContext", throwIfV1Schema: false)
         {
