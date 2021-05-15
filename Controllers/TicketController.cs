@@ -19,16 +19,19 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: Ticket
-        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
+
+        [Authorize(Roles = "TCAdmin,TCManager,TCAgent")] // AUTHORIZE ONLY USERS IN THE FOLLOWING ROLES - TCAdmin, TCAgent and TCManager
+
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
+            // TICKET SORTING
             ViewBag.CurrentSort = sortOrder;
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "body_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "status_desc" : "";
             ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
-
+            // SERACH FUNCTION
             if (searchString != null)
             {
                 page = 1;
@@ -39,9 +42,8 @@ namespace WebApplication5.Controllers
             }
 
             ViewBag.CurrentFilter = searchString;
-
-            var tickets = from s in db.Tickets
-            //IQueryable<Ticket> tickets = from s in db.Tickets
+            // SHOWING ONLY OPENED TICKETS
+            var tickets = from s in db.Tickets where s.Status.ToString().Contains("Open")
                           select s;
 
             if (!String.IsNullOrEmpty(searchString))
@@ -55,7 +57,7 @@ namespace WebApplication5.Controllers
                                         || s.Department.DepartmentName.ToString().Contains(searchString)
                                         );
             }
-
+            // SORTING OPTIONS
             switch (sortOrder)
             {
                 case "title_desc":
@@ -82,7 +84,9 @@ namespace WebApplication5.Controllers
             return View(tickets.ToPagedList(pageNumber, pageSize));
         }
 
-        // GET: Ticket/Details/5
+
+        // GET: Ticket/Details/5 - TICKET DETAILS
+
         [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Details(int? id)
         {
@@ -111,6 +115,19 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Create
+
+        /*
+         * WORKS IN THE FOLLOWING WAY:
+         * PARTIAL USER DATA IS SAVED ON THE TICKET
+         * WHEN THE TICKET IS SUBMITTED, SYSTEM SCANS THE TICKET FOR THE KEYWORDS AND KEEPS A SCORE FOR EACH KEYWORD FOUND AND DEPARTMENT
+         * THE SCORE IS THEN EVALUATED AND THE DEPARTMENT WITH THE BEST SCORE IS SELECTED
+         * ALL AGENTS FROM THE SELECTED DEPARTMENT ARE PULLED
+         * ALL TICKETS ASSIGNED TO AGENTS ARE PULLED
+         * THE TICKET NUMBER BETWEEN EACH AGENT IS EVALUATED
+         * TICKET GOES TO AGENT WITH LEAST TICKETS IN THE DEPARTMENT
+         * DB TABLES FOR TICKETS AND AGENTS ARE UPDATED TO REFLECT CHANGES
+         */
+
         [Authorize]
         public ActionResult Create()
         {
@@ -240,7 +257,7 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
-            System.Diagnostics.Debug.WriteLine("I got here 2:");
+
             ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName"); // GET LIST OF AGENTS
             
             return View(ticket);
@@ -256,25 +273,27 @@ namespace WebApplication5.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(ticket).State = EntityState.Modified;
-                
-                if (ticket.Status.Equals(Ticket.TicketStatus.Solved))
-                {
-                    int targetAgentId = ticket.AgentID;
-                    var targetAgent = db.Agents.Find(targetAgentId).AgentID;
-                    int ticketSolvedCount = db.Agents.Find(targetAgent).TicketsSolved;
-                    int newSolvedTicketCount = ticketSolvedCount + 1;
-                    db.Agents.Find(targetAgent).TicketsSolved = newSolvedTicketCount;
 
-                    int ticketOpenedCount = db.Agents.Find(targetAgent).TicketsAssigned;
-                    int newticketOpenedCount = ticketOpenedCount - 1;
-                    db.Agents.Find(targetAgent).TicketsAssigned = newticketOpenedCount;
+                db.Entry(ticket).State = EntityState.Modified; // DECLARE THAT THE ENTITY HAS BEEN CHANGED
+                
+                if (ticket.Status.Equals(Ticket.TicketStatus.Solved)) // IF THE TICKET CHANGES STATUS
+                {
+                    int targetAgentId = ticket.AgentID; // FIND AGENT ON THE TICKET
+                    var targetAgent = db.Agents.Find(targetAgentId).AgentID; // FIND THAT AGENT IN DB
+                    int ticketSolvedCount = db.Agents.Find(targetAgent).TicketsSolved; // GET # OF SOLVED TICKETS AGENT HAS
+                    int newSolvedTicketCount = ticketSolvedCount + 1; // UPDATE THE NUMBER
+                    db.Agents.Find(targetAgent).TicketsSolved = newSolvedTicketCount; // SET THE NEW NUMBER
+
+                    int ticketOpenedCount = db.Agents.Find(targetAgent).TicketsAssigned; // FIND # OF ASSIGNED TICKETS
+                    int newticketOpenedCount = ticketOpenedCount - 1; // UPDATE THE NUMBER
+                    db.Agents.Find(targetAgent).TicketsAssigned = newticketOpenedCount; // SET THE NEW NUMBER
                 }
-                ticket.CreatedAt = DateTime.Now;
-                db.SaveChanges();
+                ticket.CreatedAt = DateTime.Now; // SET NEW TIME
+                db.SaveChanges(); // SAVE CHANGES
+
                 return RedirectToAction("Index");
             }
-            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID);
+            ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID); // GET AGENT LIST
             return View(ticket);
         }
 
