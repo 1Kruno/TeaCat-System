@@ -21,8 +21,7 @@ namespace WebApplication5.Models
         public enum TicketStatus
         {
             Open = 1,
-            Pending = 2,
-            Solved = 3
+            Solved = 2
         }
         public virtual ICollection<Assignment> Assignments { get; set; }
         public virtual Agent Agent { get; set; }
