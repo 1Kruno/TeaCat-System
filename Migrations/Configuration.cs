@@ -17,13 +17,13 @@ namespace WebApplication5.Migrations
 
         protected override void Seed(WebApplication5.Models.ApplicationDbContext context)
         {
-            // ADD 3 TEST USERS WITH DIFFERENT ROLES
+             // ADD 3 TEST USERS WITH DIFFERENT ROLES
             var userStore = new UserStore<ApplicationUser>(context);
             var userManager = new UserManager<ApplicationUser>(userStore);
 
             if(!context.Users.Any(t => t.UserName == "admin@teacat.com"))
             {
-                var user = new ApplicationUser { UserName = "admin@teacat.com" };
+                var user = new ApplicationUser { UserName = "admin@teacat.com", Email = "admin@teacat.com" };
                 userManager.Create(user, "Passw0rd!");
 
                 context.Roles.AddOrUpdate(r => r.Name, new IdentityRole { Name = "TCAdmin" });
@@ -34,7 +34,7 @@ namespace WebApplication5.Migrations
 
             if (!context.Users.Any(t => t.UserName == "manager@teacat.com"))
             {
-                var user = new ApplicationUser { UserName = "manager@teacat.com" };
+                var user = new ApplicationUser { UserName = "manager@teacat.com", Email = "manager@teacat.com" };
                 userManager.Create(user, "Passw0rd!");
 
                 context.Roles.AddOrUpdate(r => r.Name, new IdentityRole { Name = "TCManager" });
@@ -45,7 +45,7 @@ namespace WebApplication5.Migrations
 
             if (!context.Users.Any(t => t.UserName == "agent@teacat.com"))
             {
-                var user = new ApplicationUser { UserName = "agent@teacat.com" };
+                var user = new ApplicationUser { UserName = "agent@teacat.com", Email = "agent@teacat.com" };
                 userManager.Create(user, "Passw0rd!");
 
                 context.Roles.AddOrUpdate(r => r.Name, new IdentityRole { Name = "TCAgent" });
