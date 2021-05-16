@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using PagedList;
 using System;
@@ -102,14 +102,14 @@ namespace WebApplication5.Controllers
             return View(agent);
         }
 
-        // GET: Agent/Create
+        // GET: Agent/Create 
         [Authorize(Roles = "TCAdmin")]
         public ActionResult Create()
         {
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
-            ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName");
-            ViewBag.Email = new SelectList(dbc.Users, "Email", "Email");
-            ViewBag.Role = new SelectList(dbc.Roles, "Id", "Name");
+            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName"); // FETCH DEPARTMENTS
+            ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName"); // FETCH USERNAME
+            ViewBag.Email = new SelectList(dbc.Users, "Email", "Email"); // FETCH EMAIL
+            ViewBag.Role = new SelectList(dbc.Roles, "Id", "Name"); // FETCH ROLES
             return View();
         }
 
@@ -122,23 +122,26 @@ namespace WebApplication5.Controllers
         {
             if (ModelState.IsValid)
             {
-                var oldnextAgentId = this.db.Agents.Max(theagent => theagent.AgentID);
-                var newAgentId = oldnextAgentId + 1;
-                agent.AgentID = newAgentId;
-                db.Agents.Add(agent);
+                var oldnextAgentId1 = this.db.Agents.OrderByDescending(theagent => theagent.AgentID).First(); // ASSIGN ID TO PREVENT CONCURENCY
+                int oldnextAgentId = int.Parse(oldnextAgentId1.AgentID.ToString());
+                var newAgentId = oldnextAgentId + 1; // ASSIGN ID TO PREVENT CONCURENCY
+                System.Diagnostics.Debug.WriteLine("Agent ID is " + newAgentId);
+                System.Diagnostics.Debug.WriteLine("User ID is " + agent.UserId.ToString());
+                agent.AgentID = newAgentId; // ASSIGN ID TO PREVENT CONCURENCY
+                db.Agents.Add(agent); // CREATE AGENT
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            var ue = ViewBag.Email = new SelectList(dbc.Users, "Email", "Email", agent.Email);
-            var uid = ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId);
-            var ur = ViewBag.Role= new SelectList(dbc.Roles, "Id", "Name", agent.Role);
-            var did = ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID",null , agent.DepartmentID);
+            var ue = ViewBag.Email = new SelectList(dbc.Users, "Email", "Email", agent.Email); // FETCH EMAIL
+            var uid = ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId); // FETCH USER ID
+            var ur = ViewBag.Role= new SelectList(dbc.Roles, "Id", "Name", agent.Role);  // FETCH ROLES
+            var did = ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID",null , agent.DepartmentID); // FETCH DEPARTMENTS
 
             var userStore = new UserStore<ApplicationUser>(dbc);
             var userManager = new UserManager<ApplicationUser>(userStore);
             userManager.AddToRole(agent.UserId, agent.Role);
-            System.Diagnostics.Debug.WriteLine("UserID: " + agent.UserId.ToString());
-            System.Diagnostics.Debug.WriteLine("userRole: " + agent.Role.ToString());
+            db.SaveChanges();
+            dbc.SaveChanges();
             return View(agent);
         }
 
@@ -155,6 +158,7 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.Role = new SelectList(dbc.Roles, "Id", "Name", agent.Role);  // FETCH ROLES
             ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName");
             return View(agent);
         }
@@ -173,6 +177,16 @@ namespace WebApplication5.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "DepartmentName", agent.DepartmentID);
+
+            var uid = ViewBag.UserId = new SelectList(dbc.Users, "Id", "UserName", agent.UserId); // FETCH USER ID
+            var ur = new SelectList(dbc.Roles, "Id", "Name", agent.Role);  // FETCH ROLES
+            ViewBag.Role = ur;
+
+            var userStore = new UserStore<ApplicationUser>(dbc);
+            var userManager = new UserManager<ApplicationUser>(userStore);
+            userManager.AddToRole(agent.UserId, agent.Role);
+
+
             return View(agent);
         }
 
