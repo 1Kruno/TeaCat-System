@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
@@ -11,33 +11,11 @@ namespace WebApplication5.DAL
 {
     public class TicketInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<TicketContext>
     {
-        
-        public override void InitializeDatabase(TicketContext context)
-        {
-            context.Database.ExecuteSqlCommand(TransactionalBehavior.DoNotEnsureTransaction
-            , string.Format("ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", context.Database.Connection.Database));
-
-            base.InitializeDatabase(context);
-        }
-        
 
         protected override void Seed(TicketContext context)
         {
             var userStore = new UserStore<ApplicationUser>(context);
             var userManager = new UserManager<ApplicationUser>(userStore);
-
-            /*
-            if(!context.Users.Any(t=>t.UserName == "admin@teacat.com"))
-            {
-                var user = new ApplicationUser { UserName = "admin@teacat.com", Email = "admin@teacat.com" };
-                userManager.Create(user, "Passw0rd!");
-
-                context.Roles.AddOrUpdate(r => r.Name, new IdentityRole { Name = "Admin" });
-                context.SaveChanges();
-
-                userManager.AddToRole(user.Id, "Admin");
-            }
-            */
 
             var departments = new List<Department>
             {
@@ -82,23 +60,6 @@ namespace WebApplication5.DAL
             tickets.ForEach(s => context.Tickets.Add(s));
             context.SaveChanges();
 
-            /*
-            var assignments = new List<Assignment>
-            {
-            new Assignment{AgentID=1,TicketID=1},
-            new Assignment{AgentID=1,TicketID=2},
-            new Assignment{AgentID=2,TicketID=3},
-            new Assignment{AgentID=3,TicketID=4},
-            new Assignment{AgentID=3,TicketID=5},
-            new Assignment{AgentID=3,TicketID=6},
-            new Assignment{AgentID=4,TicketID=7},
-            new Assignment{AgentID=4,TicketID=8},
-            new Assignment{AgentID=5,TicketID=9},
-            new Assignment{AgentID=6,TicketID=10}
-            };
-            assignments.ForEach(s => context.Assignments.Add(s));
-            context.SaveChanges();
-            */
             
         }
     }
