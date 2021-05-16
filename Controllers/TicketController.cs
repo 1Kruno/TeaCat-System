@@ -1,4 +1,4 @@
-﻿using PagedList;
+using PagedList;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,9 +19,7 @@ namespace WebApplication5.Controllers
         private TicketContext db = new TicketContext();
 
         // GET: Ticket
-
         [Authorize(Roles = "TCAdmin,TCManager,TCAgent")] // AUTHORIZE ONLY USERS IN THE FOLLOWING ROLES - TCAdmin, TCAgent and TCManager
-
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             // TICKET SORTING
@@ -84,9 +82,7 @@ namespace WebApplication5.Controllers
             return View(tickets.ToPagedList(pageNumber, pageSize));
         }
 
-
         // GET: Ticket/Details/5 - TICKET DETAILS
-
         [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Details(int? id)
         {
@@ -95,8 +91,6 @@ namespace WebApplication5.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Ticket ticket = db.Tickets.Find(id);
-            //ViewBag.TicketName = db.Tickets.Find(id);
-            //var comment = db.TicketComments.Where(x => x.TicketID.Equals(id)).ToList();
             if (ticket == null)
             {
                 return HttpNotFound();
@@ -115,7 +109,6 @@ namespace WebApplication5.Controllers
         }
 
         // GET: Ticket/Create
-
         /*
          * WORKS IN THE FOLLOWING WAY:
          * PARTIAL USER DATA IS SAVED ON THE TICKET
@@ -127,7 +120,6 @@ namespace WebApplication5.Controllers
          * TICKET GOES TO AGENT WITH LEAST TICKETS IN THE DEPARTMENT
          * DB TABLES FOR TICKETS AND AGENTS ARE UPDATED TO REFLECT CHANGES
          */
-
         [Authorize]
         public ActionResult Create()
         {
@@ -173,7 +165,7 @@ namespace WebApplication5.Controllers
                         if (matches) // IF THEY MATCH
                         {
                             System.Diagnostics.Debug.WriteLine("Match found.");
-                            int targetDepartmentID = keyword.DepartmentID; // GET DEPARTMENT INDEX FROM DB
+                            int targetDepartmentID = keyword.DepartmentID ; // GET DEPARTMENT INDEX FROM DB
                             int y = DepartmentIDandKeywordMatches[targetDepartmentID][0]; // GET DEPARTMENT ID FROM ARRAY
                             int z = y + 1; // INCREMENT SCORE FOR # OF MATCHES
                             DepartmentIDandKeywordMatches[targetDepartmentID][0] = z; // UPDATE THE SCORE
@@ -247,7 +239,6 @@ namespace WebApplication5.Controllers
         [Authorize(Roles = "TCAdmin,TCManager,TCAgent")]
         public ActionResult Edit(int? id)
         {
-            System.Diagnostics.Debug.WriteLine("I got here 1:");
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -257,7 +248,6 @@ namespace WebApplication5.Controllers
             {
                 return HttpNotFound();
             }
-
             ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName"); // GET LIST OF AGENTS
             
             return View(ticket);
@@ -273,7 +263,6 @@ namespace WebApplication5.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 db.Entry(ticket).State = EntityState.Modified; // DECLARE THAT THE ENTITY HAS BEEN CHANGED
                 
                 if (ticket.Status.Equals(Ticket.TicketStatus.Solved)) // IF THE TICKET CHANGES STATUS
@@ -290,7 +279,6 @@ namespace WebApplication5.Controllers
                 }
                 ticket.CreatedAt = DateTime.Now; // SET NEW TIME
                 db.SaveChanges(); // SAVE CHANGES
-
                 return RedirectToAction("Index");
             }
             ViewBag.AgentID = new SelectList(db.Agents, "AgentId", "FirstName", ticket.AgentID); // GET AGENT LIST
