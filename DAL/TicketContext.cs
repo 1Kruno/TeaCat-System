@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -15,11 +15,9 @@ namespace WebApplication5.DAL
         public DbSet<Department> Departments { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<KeywordsDepartment> KeywordsDepartments { get; set; }
-        //public DbSet<ApplicationUser> Users { get; set; }
 
         public TicketContext() : base("TicketContext")
         {
-            //this.Configuration.ProxyCreationEnabled = false;
         }
 
 
@@ -30,15 +28,9 @@ namespace WebApplication5.DAL
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
-            modelBuilder.Entity<IdentityUser>().ToTable("Users").Property(p => p.Id).HasColumnName("UserId"); ;
-            modelBuilder.Entity<ApplicationUser>().ToTable("Users").Property(p => p.Id).HasColumnName("UserId");
-            
-           // modelBuilder.Entity<IdentityUserRole>().ToTable("UserRoles");
-            //modelBuilder.Entity<IdentityUserLogin>().ToTable("UserLogins");
-            //modelBuilder.Entity<IdentityUserClaim>().ToTable("UserClaims");
-           // modelBuilder.Entity<IdentityRole>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUser>().ToTable("AspNetUsers").Property(p => p.Id).HasColumnName("UserId"); ;
+            modelBuilder.Entity<ApplicationUser>().ToTable("AspNetUsers").Property(p => p.Id).HasColumnName("UserId");
             modelBuilder.Entity<IdentityUserLogin>().HasKey<string>(l => l.UserId);
-           // modelBuilder.Entity<IdentityRole>().HasKey<string>(r => r.Id);
             modelBuilder.Entity<IdentityUserRole>().HasKey(r => new { r.RoleId, r.UserId });
             
         }
